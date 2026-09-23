@@ -1,6 +1,9 @@
 package bo.valleideas.endportal.mixin;
 
 import net.minecraft.block.AbstractFireBlock;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
+import net.minecraft.block.NetherPortalBlock;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
@@ -8,20 +11,40 @@ import net.minecraft.world.dimension.NetherPortal;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+import java.util.Optional;
 
 @Mixin(AbstractFireBlock.class)
 public abstract class NetherPortalMixin {
-    @Inject(method = "shouldLightPortalAt", at = @At("HEAD"), cancellable = true)
-    private static void endnetherportal$allowEnd(
+
+    @Inject(method = "onBlockAdded", at = @At("HEAD"), cancellable = true)
+    private void endnetherportal$createPortalInEnd(
+            BlockState state,
             World world,
             BlockPos pos,
-            Direction direction,
-            CallbackInfoReturnable<Boolean> cir) {
+            BlockState oldState,
+            boolean notify,
+            CallbackInfo ci) {
 
-        if (world.getRegistryKey() == World.END) {
-            Direction.Axis axis = direction.rotateYClockwise().getAxis();
-            cir.setReturnValue(NetherPortal.getNewPortal(world, pos, axis).isPresent());
+        if (world.getRegistryKey() != World.END) {
+            return;
+        }
+
+        Optional<NetherPortal> portal = NetherPortal.getNewPortal(world, pos, Direction.Axis.X);
+        if (portal.isEmpty()) {
+            portal = NetherPortal.getNewPortal(world, pos, Direction.Axis.Z);
+        }
+
+        if (portal.isPresent()) {
+            NetherPortal netherPortal = portal.get();
+            BlockState portalState = Blocks.NETHER_PORTAL.getDefaultState()
+                    .with(NetherPortalBlock.AXIS, netherPortal.getAxis());
+
+            netherPortal.getArea().forEach(blockPos ->
+                    world.setBlockState(blockPos, portalState, 18));
+
+            ci.cancel();
         }
     }
 }
