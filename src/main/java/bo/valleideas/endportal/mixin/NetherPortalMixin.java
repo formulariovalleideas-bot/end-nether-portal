@@ -2,8 +2,6 @@ package bo.valleideas.endportal.mixin;
 
 import net.minecraft.block.AbstractFireBlock;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.NetherPortalBlock;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
@@ -17,7 +15,6 @@ import java.util.Optional;
 
 @Mixin(AbstractFireBlock.class)
 public abstract class NetherPortalMixin {
-
     @Inject(method = "onBlockAdded", at = @At("HEAD"), cancellable = true)
     private void endnetherportal$createPortalInEnd(
             BlockState state,
@@ -27,9 +24,7 @@ public abstract class NetherPortalMixin {
             boolean notify,
             CallbackInfo ci) {
 
-        if (world.getRegistryKey() != World.END) {
-            return;
-        }
+        if (world.getRegistryKey() != World.END) return;
 
         Optional<NetherPortal> portal = NetherPortal.getNewPortal(world, pos, Direction.Axis.X);
         if (portal.isEmpty()) {
@@ -37,13 +32,7 @@ public abstract class NetherPortalMixin {
         }
 
         if (portal.isPresent()) {
-            NetherPortal netherPortal = portal.get();
-            BlockState portalState = Blocks.NETHER_PORTAL.getDefaultState()
-                    .with(NetherPortalBlock.AXIS, netherPortal.getAxis());
-
-            netherPortal.getArea().forEach(blockPos ->
-                    world.setBlockState(blockPos, portalState, 18));
-
+            portal.get().createPortal();
             ci.cancel();
         }
     }
