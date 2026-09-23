@@ -1,0 +1,12 @@
+{
+ "schemaVersion":1,
+ "id":"endnetherportal",
+ "version":"${version}",
+ "name":"End Nether Portal",
+ "description":"Allows Nether portals to be lit in The End.",
+ "authors":["Andreui y Misa"],
+ "environment":"*",
+ "entrypoints":{"main":["bo.valleideas.endportal.EndNetherPortal"]},
+ "mixins":["endnetherportal.mixins.json"],
+ "depends":{"fabricloader":">=0.16.5","minecraft":"~1.21.1","java":">=21"}
+}
