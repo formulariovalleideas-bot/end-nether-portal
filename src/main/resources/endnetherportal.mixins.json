@@ -1,0 +1,7 @@
+{
+ "required":true,
+ "package":"bo.valleideas.endportal.mixin",
+ "compatibilityLevel":"JAVA_21",
+ "mixins":["NetherPortalMixin"],
+ "injectors":{"defaultRequire":1}
+}
